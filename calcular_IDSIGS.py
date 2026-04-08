@@ -7,12 +7,21 @@ arquivo_dados = "dados_transistor com leakage.txt"
 df = pd.read_csv(arquivo_dados, sep="\t", header=0)
 
 # --- Limpeza dos dados ---
+# remove linhas onde VG, IDS ou IGS não são números válidos
+# errors='coerce' transforma valores inválidos em NaN
+# notnull() filtra e remove as linhas com NaN
 df = df[pd.to_numeric(df["VG"], errors='coerce').notnull()]
 df = df[pd.to_numeric(df["IDS"], errors='coerce').notnull()]
 df = df[pd.to_numeric(df["IGS"], errors='coerce').notnull()]
+
+# converte as colunas para float
 df["VG"] = df["VG"].astype(float)
 df["IDS"] = df["IDS"].astype(float)
 df["IGS"] = df["IGS"].astype(float)
+
+df["IDS"] = np.abs(df["IDS"]) # coloca a coluno IDS em valores aboslutos
+print(df["IDS"].min())
+print(df["IDS"].max())
 
 # --- Identificação dos ciclos ---
 cycle = -1
@@ -34,6 +43,8 @@ df["direction"] = np.where(df["diff_VG"] < 0, "ida", "volta")  # descida = ida n
 
 # --- Filtra apenas a ida (descida de +0.5 V até -2.5 V) ---
 df_ida = df[df["direction"] == "ida"].copy()
+df_ida["log_IDS"] = np.log10(df_ida["IDS"])
+print(df_ida["log_IDS"].head(10))
 
 # --- Análise por ciclo ---
 resultados = []
@@ -66,12 +77,17 @@ for ciclo in sorted(df_ida["cycle_id"].unique()):
 
 df_result = pd.DataFrame(resultados)
 
+razao_on_off = df_ida["IDS"].max() / df_ida["IDS"].min()
+print(f"Razão on/off: {razao_on_off}")
+
 # --- Estatísticas ---
 media_razao = df_result["Razão IDS/IGS"].mean()
 std_razao = df_result["Razão IDS/IGS"].std()
 
 # --- Salvamento dos resultados ---
 df_result.to_csv("razao_ids_igs_por_ciclo_-2.5V.csv", index=False)
+df_ida.to_csv("razao_vg_por_log_ids.csv", index=False)
+pd.DataFrame({"Razão on/off": [razao_on_off]}).to_csv("razao_on_off.csv", index=False)
 
 # --- Gráfico: razão IDS/IGS por ciclo ---
 plt.figure(figsize=(10,6))
