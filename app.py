@@ -13,15 +13,6 @@ df = pd.read_csv(arquivo)
 arquivo_log = "razao_vg_por_log_ids.csv"
 df_ida = pd.read_csv(arquivo_log)
 
-st.subheader("VG vs log(IDS)")
-df_ciclo0 = df_ida[df_ida["cycle_id"] == 0]
-df_ciclo0 = df_ciclo0.sort_values("VG")
-fig = px.line(df_ciclo0, x="VG", y="log_IDS", title="VG vs log(IDS)")
-st.plotly_chart(fig)
-
-df_on_off = pd.read_csv("razao_on_off.csv")
-razao_on_off = df_on_off["Razão on/off"].values[0]
-st.metric(label="Razão on/off", value=f"{razao_on_off:.2e}")
 
 st.subheader("Resultados")
 st.dataframe(df)
@@ -41,4 +32,16 @@ ciclos = st.multiselect(
 
 df_filtrado = df[df["Ciclo"].isin(ciclos)]
 
+
 st.line_chart(df_filtrado.set_index("Ciclo")["Razão IDS/IGS"])
+st.subheader("VG vs log(IDS)")
+ciclo = st.selectbox("Escolha um ciclo para análise detalhada", df_ida["cycle_id"].unique())
+df_ciclo = df_ida[df_ida["cycle_id"] == ciclo]
+df_ciclo = df_ciclo.sort_values("VG")
+fig = px.line(df_ciclo, x="VG", y="log_IDS", title="VG vs log(IDS)")
+st.plotly_chart(fig)
+
+razao_on_off = df[df["Ciclo"] == ciclo]["Razão on/off"].values[0]
+st.metric(label="Razão on/off", value=f"{razao_on_off:.2e}")
+
+

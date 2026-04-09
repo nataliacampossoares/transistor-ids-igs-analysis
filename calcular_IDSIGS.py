@@ -20,8 +20,6 @@ df["IDS"] = df["IDS"].astype(float)
 df["IGS"] = df["IGS"].astype(float)
 
 df["IDS"] = np.abs(df["IDS"]) # coloca a coluno IDS em valores aboslutos
-print(df["IDS"].min())
-print(df["IDS"].max())
 
 # --- Identificação dos ciclos ---
 cycle = -1
@@ -43,6 +41,7 @@ df["direction"] = np.where(df["diff_VG"] < 0, "ida", "volta")  # descida = ida n
 
 # --- Filtra apenas a ida (descida de +0.5 V até -2.5 V) ---
 df_ida = df[df["direction"] == "ida"].copy()
+df_ida = df_ida[df_ida["cycle_id"] >= 0]
 df_ida["log_IDS"] = np.log10(df_ida["IDS"])
 print(df_ida["log_IDS"].head(10))
 
@@ -67,18 +66,20 @@ for ciclo in sorted(df_ida["cycle_id"].unique()):
     else:
         razao = ids / igs
 
+    razao_on_off = dados["IDS"].max() / dados["IDS"].min()
+    
     resultados.append({
         "Ciclo": ciclo,
         "VG": VG_alvo,
         "IDS (A)": ids,
         "IGS (A)": igs,
-        "Razão IDS/IGS": razao
+        "Razão IDS/IGS": razao,
+        "Razão on/off": razao_on_off
     })
 
 df_result = pd.DataFrame(resultados)
 
-razao_on_off = df_ida["IDS"].max() / df_ida["IDS"].min()
-print(f"Razão on/off: {razao_on_off}")
+print("resultados coluna", df_result.columns)
 
 # --- Estatísticas ---
 media_razao = df_result["Razão IDS/IGS"].mean()
@@ -87,7 +88,6 @@ std_razao = df_result["Razão IDS/IGS"].std()
 # --- Salvamento dos resultados ---
 df_result.to_csv("razao_ids_igs_por_ciclo_-2.5V.csv", index=False)
 df_ida.to_csv("razao_vg_por_log_ids.csv", index=False)
-pd.DataFrame({"Razão on/off": [razao_on_off]}).to_csv("razao_on_off.csv", index=False)
 
 # --- Gráfico: razão IDS/IGS por ciclo ---
 plt.figure(figsize=(10,6))
