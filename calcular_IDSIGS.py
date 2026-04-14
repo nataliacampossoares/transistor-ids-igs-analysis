@@ -41,9 +41,14 @@ df["direction"] = np.where(df["diff_VG"] < 0, "ida", "volta")  # descida = ida n
 
 # --- Filtra apenas a ida (descida de +0.5 V até -2.5 V) ---
 df_ida = df[df["direction"] == "ida"].copy()
-df_ida = df_ida[df_ida["cycle_id"] >= 0]
-df_ida["log_IDS"] = np.log10(df_ida["IDS"])
-print(df_ida["log_IDS"].head(10))
+df_ida = df_ida[df_ida["cycle_id"] >= 0] # no streamlit tava aparecendo o valor -1 (que nao existe) entao aqui foi um filtro para tratar esse erro
+df_ida["log_IDS"] = np.log10(df_ida["IDS"]) # cria uma coluna no df_ida com os logs dos ids
+
+# --- Filtra apenas a ida
+df_volta = df[df["direction"] == "volta"].copy()
+df_volta = df_volta[df_volta["cycle_id"] >= 0] # no streamlit tava aparecendo o valor -1 (que nao existe) entao aqui foi um filtro para tratar esse erro
+df_volta["log_IDS"] = np.log10(df_volta["IDS"]) # cria uma coluna no df_ida com os logs dos ids
+
 
 # --- Análise por ciclo ---
 resultados = []
@@ -66,18 +71,48 @@ for ciclo in sorted(df_ida["cycle_id"].unique()):
     else:
         razao = ids / igs
 
-    razao_on_off = dados["IDS"].max() / dados["IDS"].min()
-    
+    razao_on_off = dados["IDS"].max() / dados["IDS"].min() # aq calcula a razao on/off de cada ciclo
+    #eu tinha calculado a principio com o df, mas tinha os dados de ida e volta juntos. depois foi com o df_result, mas os valores de bg eram todos -2,5v 
     resultados.append({
         "Ciclo": ciclo,
         "VG": VG_alvo,
         "IDS (A)": ids,
         "IGS (A)": igs,
         "Razão IDS/IGS": razao,
-        "Razão on/off": razao_on_off
+        "Razão on/off": razao_on_off,
+        "direction": "ida"
+    })
+    
+
+for ciclo in sorted(df_volta["cycle_id"].unique()):
+    dados = df_volta[df_volta["cycle_id"] == ciclo]
+    ponto = dados[np.isclose(dados["VG"], VG_alvo, atol=tolerancia)]
+
+    if ponto.empty:
+        continue
+
+    ids = ponto["IDS"].values[0]
+    igs = ponto["IGS"].values[0]
+    
+    if igs == 0:
+        razao = np.nan
+    else:
+        razao = ids / igs
+
+    razao_on_off = dados["IDS"].max() / dados["IDS"].min() # aq calcula a razao on/off de cada ciclo
+    #eu tinha calculado a principio com o df, mas tinha os dados de ida e volta juntos. depois foi com o df_result, mas os valores de bg eram todos -2,5v 
+    resultados.append({
+        "Ciclo": ciclo,
+        "VG": VG_alvo,
+        "IDS (A)": ids,
+        "IGS (A)": igs,
+        "Razão IDS/IGS": razao,
+        "Razão on/off": razao_on_off,
+        "direction": "volta"
     })
 
 df_result = pd.DataFrame(resultados)
+print(df_result["direction"].unique())
 
 print("resultados coluna", df_result.columns)
 
@@ -87,7 +122,8 @@ std_razao = df_result["Razão IDS/IGS"].std()
 
 # --- Salvamento dos resultados ---
 df_result.to_csv("razao_ids_igs_por_ciclo_-2.5V.csv", index=False)
-df_ida.to_csv("razao_vg_por_log_ids.csv", index=False)
+df_ida.to_csv("razao_vg_por_log_ids_ida.csv", index=False) 
+df_volta.to_csv("razao_vg_por_log_ids_volta.csv", index=False) 
 
 # --- Gráfico: razão IDS/IGS por ciclo ---
 plt.figure(figsize=(10,6))
