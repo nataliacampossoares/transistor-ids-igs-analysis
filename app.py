@@ -46,25 +46,33 @@ st.line_chart(df_filtrado.set_index("Ciclo")["Razão IDS/IGS"])
 
 # --- gráfico vg vs log(ids) por ciclo ---
 st.subheader("VG vs log(IDS)")
-ciclo = st.selectbox("Escolha um ciclo", df_ida_log["cycle_id"].unique())
+ciclo = st.multiselect(
+    "Escolha um ciclo", 
+    df_ida_log["cycle_id"].unique(), 
+    default=[0])
 fig = go.Figure()
-if mostrar_ida:
-    df_ciclo_ida = df_ida_log[df_ida_log["cycle_id"] == ciclo].sort_values("VG")
-    fig.add_trace(go.Scatter(x=df_ciclo_ida["VG"], y=df_ciclo_ida["log_IDS"], name="ida", line=dict(color="blue")))
-if mostrar_volta:
-    df_ciclo_volta = df_volta_log[df_volta_log["cycle_id"] == ciclo].sort_values("VG")
-    fig.add_trace(go.Scatter(x=df_ciclo_volta["VG"], y=df_ciclo_volta["log_IDS"], name="volta", line=dict(color="red")))
 
+cores = ["blue", "red", "green", "orange", "purple", "pink", "brown", "gray", "cyan"]  # lista de cores para diferenciar os ciclos
+razoes = []
+for i, c in enumerate(ciclo):
+    cor = cores[i % len(cores)]
+    if mostrar_ida:
+        df_ciclo_ida = df_ida_log[df_ida_log["cycle_id"] == c].sort_values("VG")
+        fig.add_trace(go.Scatter(x=df_ciclo_ida["VG"], y=df_ciclo_ida["log_IDS"], name=f"Ciclo {c} - ida", line=dict(color=cor, dash="solid")))
+        razao_on_off_ida = df[(df["Ciclo"] == c) & (df["direction"] == "ida")]["Razão on/off"].values
+        if len(razao_on_off_ida) > 0:
+            razoes.append({"label": f"Razão on/off - Ida (Ciclo {c})", "valor": razao_on_off_ida[0]})
+    if mostrar_volta:
+        df_ciclo_volta = df_volta_log[df_volta_log["cycle_id"] == c].sort_values("VG")
+        fig.add_trace(go.Scatter(x=df_ciclo_volta["VG"], y=df_ciclo_volta["log_IDS"], name=f"Ciclo {c} - volta", line=dict(color=cor, dash="dash")))
+        razao_on_off_volta = df[(df["Ciclo"] == c) & (df["direction"] == "volta")]["Razão on/off"].values
+        if len(razao_on_off_volta) > 0:
+            razoes.append({"label": f"Razão on/off - Volta (Ciclo {c})", "valor": razao_on_off_volta[0]})
+                        
 # --- razao on/off ---
 fig.update_layout(title="VG vs log(IDS)", xaxis_title="VG", yaxis_title="log(IDS)")
 st.plotly_chart(fig)
-if mostrar_ida:
-    razao_on_off_ida = df[(df["Ciclo"] == ciclo) & (df["direction"] == "ida")]["Razão on/off"].values
-    if len(razao_on_off_ida) > 0:
-        st.metric(label=f"Razão on/off - Ida (Ciclo {ciclo})", value=f"{razao_on_off_ida[0]:.2e}")
+for r in razoes:
+    st.metric(label=r["label"], value=f"{r['valor']:.2e}")
 
-if mostrar_volta:
-    razao_on_off_volta = df[(df["Ciclo"] == ciclo) & (df["direction"] == "volta")]["Razão on/off"].values
-    if len(razao_on_off_volta) > 0:
-        st.metric(label=f"Razão on/off - Volta (Ciclo {ciclo})", value=f"{razao_on_off_volta[0]:.2e}")
 
