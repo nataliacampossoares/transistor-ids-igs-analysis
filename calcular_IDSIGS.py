@@ -44,12 +44,10 @@ df_ida = df[df["direction"] == "ida"].copy()
 df_ida = df_ida[df_ida["cycle_id"] >= 0] # no streamlit tava aparecendo o valor -1 (que nao existe) entao aqui foi um filtro para tratar esse erro
 df_ida["log_IDS"] = np.log10(df_ida["IDS"]) # cria uma coluna no df_ida com os logs dos ids
 
-# --- Filtra apenas a ida
+# --- Filtra apenas a volta
 df_volta = df[df["direction"] == "volta"].copy()
 df_volta = df_volta[df_volta["cycle_id"] >= 0] # no streamlit tava aparecendo o valor -1 (que nao existe) entao aqui foi um filtro para tratar esse erro
-df_volta["log_IDS"] = np.log10(df_volta["IDS"]) # cria uma coluna no df_ida com os logs dos ids
-
-
+df_volta["log_IDS"] = np.log10(df_volta["IDS"]) 
 # --- Análise por ciclo ---
 resultados = []
 
