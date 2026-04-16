@@ -1,4 +1,7 @@
-pip install streamlit \n
-pip install pandas \n
-pip install plotly \n
+pip install streamlit
+
+pip install pandas 
+
+pip install plotly 
+
 pip install numpy
