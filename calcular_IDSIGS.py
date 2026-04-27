@@ -48,6 +48,7 @@ df_ida["log_IDS"] = np.log10(df_ida["IDS"]) # cria uma coluna no df_ida com os l
 df_volta = df[df["direction"] == "volta"].copy()
 df_volta = df_volta[df_volta["cycle_id"] >= 0] # no streamlit tava aparecendo o valor -1 (que nao existe) entao aqui foi um filtro para tratar esse erro
 df_volta["log_IDS"] = np.log10(df_volta["IDS"]) 
+
 # --- Análise por ciclo ---
 resultados = []
 
@@ -110,9 +111,6 @@ for ciclo in sorted(df_volta["cycle_id"].unique()):
     })
 
 df_result = pd.DataFrame(resultados)
-print(df_result["direction"].unique())
-
-print("resultados coluna", df_result.columns)
 
 # --- Estatísticas ---
 media_razao = df_result["Razão IDS/IGS"].mean()
