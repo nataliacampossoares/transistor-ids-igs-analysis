@@ -65,19 +65,27 @@ if arquivo_upload is not None:
         cor = cores[i % len(cores)]
         if mostrar_ida:
             df_ciclo_ida = df_ida_log[df_ida_log["cycle_id"] == c].sort_values("VG")
-            fig.add_trace(go.Scatter(x=df_ciclo_ida["VG"], y=df_ciclo_ida["log_IDS"], name=f"Ciclo {c} - ida", line=dict(color=cor, dash="solid")))
+            fig.add_trace(go.Scatter(x=df_ciclo_ida["VG"], y=df_ciclo_ida["IDS"], name=f"Ciclo {c} - ida", line=dict(color=cor, dash="solid")))
             razao_on_off_ida = df[(df["Ciclo"] == c) & (df["direction"] == "ida")]["Razão on/off"].values
             if len(razao_on_off_ida) > 0:
                 razoes.append({"Ciclo": c, "Direção": "Ida", "Valor": razao_on_off_ida[0]})
         if mostrar_volta:
             df_ciclo_volta = df_volta_log[df_volta_log["cycle_id"] == c].sort_values("VG")
-            fig.add_trace(go.Scatter(x=df_ciclo_volta["VG"], y=df_ciclo_volta["log_IDS"], name=f"Ciclo {c} - volta", line=dict(color=cor, dash="dash")))
+            fig.add_trace(go.Scatter(x=df_ciclo_volta["VG"], y=df_ciclo_volta["IDS"], name=f"Ciclo {c} - volta", line=dict(color=cor, dash="dash")))
             razao_on_off_volta = df[(df["Ciclo"] == c) & (df["direction"] == "volta")]["Razão on/off"].values
             if len(razao_on_off_volta) > 0:
                 razoes.append({"Ciclo": c, "Direção": "Volta", "Valor": razao_on_off_volta[0]})
                 
     # --- razao on/off ---
-    fig.update_layout(title="VG vs log(IDS)", xaxis_title="VG", yaxis_title="log(IDS)")
+    fig.update_layout(
+        title="VG vs log(IDS)", 
+        xaxis_title="VG", 
+        yaxis_title="log(IDS)",
+        yaxis=dict(
+            type="log",
+            exponentformat="power",
+            dtick=1
+    )   )
     st.plotly_chart(fig)
     
     # --- tabela de resultados on/off ---
