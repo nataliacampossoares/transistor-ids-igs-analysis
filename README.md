@@ -9,9 +9,13 @@ A tool for analyzing transistor behavior through IDS/IGS current ratio, on/off r
 - Matplotlib
 - Streamlit
 - Plotly
+- 
+## Installation
 
-Install dependencies:
+Clone the repository:
 ```bash
+git clone https://github.com/nataliacampossoares/transistor-ids-igs-analysis.git
+cd transistor-ids-igs-analysis
 pip install -r requirements.txt
 ```
 
