@@ -98,4 +98,3 @@ if arquivo_upload is not None:
 else:
     st.warning("Por favor, suba um arquivo .txt para continuar")
     st.stop()
-
