@@ -36,10 +36,6 @@ if arquivo_upload is not None:
     st.subheader("Resultados")
     st.dataframe(df)
 
-    # --- grafico ids/igs por ciclo ---
-    st.subheader("IDSIGS vs Ciclo")
-    st.line_chart(df.set_index("Ciclo")["Razão IDS/IGS"]) # coloca o ciclo no eixo x e a razão IDS/IGS no eixo y
-
     # --- filtro de ciclos ---
     st.subheader("Filtrar ciclos")
     ciclos = st.multiselect(
