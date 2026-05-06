@@ -9,7 +9,7 @@ A tool for analyzing transistor behavior through IDS/IGS current ratio, on/off r
 - Matplotlib
 - Streamlit
 - Plotly
-- 
+  
 ## Installation
 
 Clone the repository:
