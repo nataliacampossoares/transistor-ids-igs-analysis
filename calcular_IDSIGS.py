@@ -6,6 +6,12 @@ import matplotlib.pyplot as plt
 arquivo_dados = "dados_transistor com leakage.txt"
 df = pd.read_csv(arquivo_dados, sep="\t", header=0)
 
+df = df.rename(columns={
+    "Vgs (V)": "VG",
+    "Ids (A)": "IDS",
+    "Igs (A)": "IGS"
+})
+
 # --- Limpeza dos dados ---
 # remove linhas onde VG, IDS ou IGS não são números válidos
 # errors='coerce' transforma valores inválidos em NaN
@@ -79,7 +85,9 @@ for ciclo in sorted(df_ida["cycle_id"].unique()):
         "IGS (A)": igs,
         "Razão IDS/IGS": razao,
         "Razão on/off": razao_on_off,
-        "direction": "ida"
+        "direction": "ida",
+        "Valor Máximo IDS": dados["IDS"].max(),
+        "Valor Mínimo IDS": dados["IDS"].min()
     })
     
 
@@ -107,7 +115,9 @@ for ciclo in sorted(df_volta["cycle_id"].unique()):
         "IGS (A)": igs,
         "Razão IDS/IGS": razao,
         "Razão on/off": razao_on_off,
-        "direction": "volta"
+        "direction": "volta",
+        "Valor Máximo IDS": dados["IDS"].max(),
+        "Valor Mínimo IDS": dados["IDS"].min()
     })
 
 df_result = pd.DataFrame(resultados)
@@ -135,3 +145,4 @@ plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
 plt.savefig("razao_ids_igs_por_ciclo_-2.5V.png", dpi=300)
 plt.show()
+print(df_result.columns)
