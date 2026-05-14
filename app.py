@@ -8,24 +8,22 @@ st.set_page_config(layout="wide")
 
 st.title("Análise de IDSIGS por Ciclo")
 
-
-
 arquivo_upload = st.file_uploader("Suba o arquivo de dados", type=["txt"])
 
 if arquivo_upload is not None:
     # --- salva o arquivo enviado pelo usuario ---
-    with open("dados_transistor com leakage.txt", "wb") as f:
+    with open("data/dados_transistor com leakage.txt", "wb") as f:
         f.write(arquivo_upload.getbuffer())
     subprocess.run(["python3", "calcular_IDSIGS.py"])
     
     # --- leitura dos arquivos ---
     
     # pontos calculados por ciclo só no VG = -2.5V
-    df = pd.read_csv("razao_ids_igs_por_ciclo_-2.5V.csv")
+    df = pd.read_csv("outputs/razao_ids_igs_por_ciclo_-2.5V.csv")
     # pontos da varredura de VG na ida, com a coluna de log(IDS)
-    df_ida_log = pd.read_csv("razao_vg_por_log_ids_ida.csv")
+    df_ida_log = pd.read_csv("outputs/razao_vg_por_log_ids_ida.csv")
     # pontos da varredura de VG na volta, com a coluna de log(IDS)
-    df_volta_log = pd.read_csv("razao_vg_por_log_ids_volta.csv")
+    df_volta_log = pd.read_csv("outputs/razao_vg_por_log_ids_volta.csv")
     
     # --- filtro de direcao ---
     mostrar_ida = st.checkbox("Ida", value=True)

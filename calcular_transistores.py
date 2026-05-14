@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_excel("Dados Transistores maiza_ic_natalia.xlsx")
+df = pd.read_excel("data/dados_transistores_raw.xlsx")
 
 resultados_dados = []
 for i in range(1, 10):
@@ -26,7 +26,7 @@ df_resultado["IDS"] = np.abs(df_resultado["IDS"])
 df_resultado["log_IDS"] = np.log10(df_resultado["IDS"])
 
 # salva o CSV
-df_resultado.to_csv("dados_transistores.csv", index=False)
+df_resultado.to_csv("outputs/dados_transistores.csv", index=False)
 
 VG_alvo = 4.0
 tolerancia = 0.1
@@ -63,7 +63,6 @@ for transistor in sorted(df_resultado["transistor"].unique()):
 
 
 df_result = pd.DataFrame(resultados)
-df_result.to_csv("razao_transistores.csv", index=False)
-print(df_result)
+df_result.to_csv("outputs/razao_transistores.csv", index=False)
 
 print("Arquivo salvo")

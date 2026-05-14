@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Leitura dos dados ---
-arquivo_dados = "dados_transistor com leakage.txt"
+arquivo_dados = "data/dados_transistor com leakage.txt"
 df = pd.read_csv(arquivo_dados, sep="\t", header=0)
 
 df = df.rename(columns={
@@ -127,9 +127,9 @@ media_razao = df_result["Razão IDS/IGS"].mean()
 std_razao = df_result["Razão IDS/IGS"].std()
 
 # --- Salvamento dos resultados ---
-df_result.to_csv("razao_ids_igs_por_ciclo_-2.5V.csv", index=False)
-df_ida.to_csv("razao_vg_por_log_ids_ida.csv", index=False) 
-df_volta.to_csv("razao_vg_por_log_ids_volta.csv", index=False) 
+df_result.to_csv("outputs/razao_ids_igs_por_ciclo_-2.5V.csv", index=False)
+df_ida.to_csv("outputs/razao_vg_por_log_ids_ida.csv", index=False) 
+df_volta.to_csv("outputs/razao_vg_por_log_ids_volta.csv", index=False) 
 
 # --- Gráfico: razão IDS/IGS por ciclo ---
 plt.figure(figsize=(10,6))
@@ -143,6 +143,6 @@ plt.yscale('log')  # Escala logarítmica
 plt.legend()
 plt.grid(True, which='both', linestyle='--', linewidth=0.5)
 plt.tight_layout()
-plt.savefig("razao_ids_igs_por_ciclo_-2.5V.png", dpi=300)
+plt.savefig("outputs/razao_ids_igs_por_ciclo_-2.5V.png", dpi=300)
 plt.show()
 print(df_result.columns)
