@@ -32,8 +32,7 @@ if arquivo_upload is not None:
         df["Transistor"],
         default=df["Transistor"]
     )
-    df_filtrado = df[df["Transistor"].isin(transistores)]
-    # tentei usar o pandas para plotar esse grafico, mas os pontos nao estavam ordenados e nao havia controle sobre os eixos
+    df_filtrado = df[df["Transistor"].isin(transistores)]  
     st.line_chart(df_filtrado.set_index("Transistor")["Razão IDS/IGS"])
     
     
@@ -41,14 +40,13 @@ if arquivo_upload is not None:
     st.subheader("VG vs log(IDS)")
     transistor = st.multiselect(
         "Escolha um transistor", 
-        df["Transistor"].unique(), # lista todos os ciclos sem repetir
+        df["Transistor"].unique(),
         default=[1])
-    fig = go.Figure() # cria uma figura vazia no plotly, q vai ser preenchida com as linhas de cada ciclo do loop
+    fig = go.Figure() 
 
-
-    cores = ["blue", "red", "green", "orange", "purple", "pink", "brown", "gray", "cyan"]  # lista de cores para diferenciar os ciclos
+    cores = ["blue", "red", "green", "orange", "purple", "pink", "brown", "gray", "cyan"]  
     razoes = []
-    for i, t in enumerate(transistor): # passa por cada ciclo que o usuario escolheu. i é pra cor e c é pro ciclo
+    for i, t in enumerate(transistor): 
         cor = cores[i % len(cores)]
         df_transistor = df_log[df_log["transistor"] == t].sort_values("VG")
         fig.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t}", line=dict(color=cor, dash="solid")))

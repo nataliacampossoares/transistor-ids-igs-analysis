@@ -47,8 +47,7 @@ for transistor in sorted(df_resultado["transistor"].unique()):
     else:
         razao = ids / igs
 
-    razao_on_off = dados["IDS"].max() / dados["IDS"].min() # aq calcula a razao on/off de cada ciclo
-    #eu tinha calculado a principio com o df, mas tinha os dados de ida e volta juntos. depois foi com o df_result, mas os valores de bg eram todos -2,5v 
+    razao_on_off = dados["IDS"].max() / dados["IDS"].min()
     resultados.append({
         "Transistor": transistor,
         "VG": VG_alvo,
@@ -56,7 +55,6 @@ for transistor in sorted(df_resultado["transistor"].unique()):
         "IGS (A)": igs,
         "Razão IDS/IGS": razao,
         "Razão on/off": razao_on_off,
-        "direction": "ida",
         "Valor Máximo IDS": dados["IDS"].max(),
         "Valor Mínimo IDS": dados["IDS"].min()
     })
@@ -64,5 +62,3 @@ for transistor in sorted(df_resultado["transistor"].unique()):
 
 df_result = pd.DataFrame(resultados)
 df_result.to_csv("outputs/razao_transistores.csv", index=False)
-
-print("Arquivo salvo")
