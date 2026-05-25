@@ -2,19 +2,24 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-df = pd.read_excel("data/dados_transistores_raw.xlsx")
+abas = ["Data", "Append1", "Append2", "Append3", "Append4", "Append5"]
 
 resultados_dados = []
-for i in range(1, 10):
+for i in range(6):             
+    df = pd.read_excel("data/dados_brutos.xls", sheet_name=abas[i])
     for j in range(len(df)):
-        resultados_dados.append({
-            "VG": df["Potencial (V)"][j],
-            "IDS": df[f"{i}_IDS"][j],
-            "IGS": df[f"{i}_IGS"][j],
+        resultados_dados.append({                       
+            "VG" : df["BaseV"][j],               
+            "IDS" : df["CollectorI"][j],                  
+            "IGS" : df["BaseI"][j],
             "transistor": i
-        })
+})
 
 df_resultado = pd.DataFrame(resultados_dados)
+
+# identifica a direção usando o diff do VG
+df_resultado["diff_VG"] = df_resultado.groupby("transistor")["VG"].diff()
+df_resultado["direction"] = np.where(df_resultado["diff_VG"] > 0, "ida", "volta")
 
 # remove as colunas vazias (Unnamed)
 df_resultado = df_resultado.dropna(subset=["IDS", "IGS"])
@@ -28,7 +33,10 @@ df_resultado["log_IDS"] = np.log10(df_resultado["IDS"])
 # salva o CSV
 df_resultado.to_csv("outputs/dados_transistores.csv", index=False)
 
-VG_alvo = 4.0
+print(df_resultado["VG"].max())
+print(df_resultado["VG"].min())
+
+VG_alvo = 12.0
 tolerancia = 0.1
 
 resultados = []

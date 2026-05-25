@@ -8,12 +8,12 @@ st.set_page_config(layout="wide")
 
 st.title("Análise de IDSIGS por Transistor")
 
-arquivo_upload = st.file_uploader("Suba o arquivo de dados", type=["xlsx"])
+arquivo_upload = st.file_uploader("Suba o arquivo de dados", type=["xlsx", "xls"])
 
 if arquivo_upload is not None:
     
     # --- salva o arquivo enviado pelo usuario ---
-    with open("data/dados_transistores_raw.xlsx", "wb") as f:
+    with open("data/dados_brutos.xls", "wb") as f:
         f.write(arquivo_upload.getbuffer())
     subprocess.run(["python3", "calcular_transistores.py"])
     
@@ -48,7 +48,7 @@ if arquivo_upload is not None:
     razoes = []
     for i, t in enumerate(transistor): 
         cor = cores[i % len(cores)]
-        df_transistor = df_log[df_log["transistor"] == t].sort_values("VG")
+        df_transistor = df_log[df_log["transistor"] == t]
         fig.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t}", line=dict(color=cor, dash="solid")))
         razao_on_off = df[(df["Transistor"] == t)]["Razão on/off"].values
         if len(razao_on_off) > 0:
