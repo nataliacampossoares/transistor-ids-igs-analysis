@@ -1,37 +1,20 @@
-# Transistor IDS/IGS analysis
+## Como usar
 
-A tool for analyzing transistor behavior through IDS/IGS current ratio, on/off ratio, and transfer curves across multiple gate voltage sweep cycles.
+### Análise de ciclagem de transistor (app.py)
+1. Suba o arquivo `.txt` com os dados
+2. Use os checkboxes para filtrar entre ida e volta
+3. Selecione os ciclos para comparar no gráfico
 
-## Requirements
-- Python 
-- Pandas
-- Numpy
-- Matplotlib
-- Streamlit
-- Plotly
-  
-## Installation
+### Análise comparativa de transistores (app_transistores.py)
+1. Suba o arquivo `.xls` com os dados
+2. Selecione os transistores para comparar no gráfico
 
-Clone the repository:
-```bash
-git clone https://github.com/nataliacampossoares/transistor-ids-igs-analysis.git
-cd transistor-ids-igs-analysis
-pip install -r requirements.txt
-```
+## Estrutura de arquivos
 
-## How to use
-
-1. Run the app:
-```bash
-streamlit run app.py
-```
-
-2. Upload your `.txt` data file
-3. Use the checkboxes to filter between forward and reverse sweeps
-4. Select cycles to compare in the chart
-
-## File structure
-
-- `app.py` — interactive Streamlit dashboard
-- `calcular_IDSIGS.py` — data processing script
-- `requirements.txt` — project dependencies
+- `app.py` — dashboard interativo para análise de ciclagem
+- `app_transistores.py` — dashboard interativo para comparação de transistores
+- `calcular_IDSIGS.py` — script de processamento para análise de ciclagem
+- `calcular_transistores.py` — script de processamento para comparação de transistores
+- `requirements.txt` — dependências do projeto
+- `data/` — pasta para arquivos de dados brutos
+- `outputs/` — pasta para arquivos processados
