@@ -18,7 +18,7 @@ if arquivo_upload is not None:
     subprocess.run(["python3", "calcular_transistores.py"])
     
     # --- leitura dos arquivos ---
-    df = pd.read_csv("outputs/razao_ids_igs_por_transistor_4V.csv")
+    df = pd.read_csv("outputs/razao_transistores.csv")
     df_log = pd.read_csv("outputs/dados_transistores.csv")
     
     # --- tabela de resultados ---
@@ -65,6 +65,7 @@ if arquivo_upload is not None:
     st.dataframe(df_on_off) 
     media = df_on_off["Valor"].mean()
     st.markdown(f"#### Média da Razão on/off: {media:.2e}")
+    
 else:
     st.warning("Por favor, suba um arquivo .xlsx para continuar")
     st.stop()

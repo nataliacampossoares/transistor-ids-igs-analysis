@@ -33,8 +33,6 @@ df_resultado["log_IDS"] = np.log10(df_resultado["IDS"])
 # salva o CSV
 df_resultado.to_csv("outputs/dados_transistores.csv", index=False)
 
-print(df_resultado["VG"].max())
-print(df_resultado["VG"].min())
 
 VG_alvo = 12.0
 tolerancia = 0.1
