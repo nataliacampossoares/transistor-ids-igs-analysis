@@ -66,6 +66,57 @@ if arquivo_upload is not None:
     media = df_on_off["Valor"].mean()
     st.markdown(f"#### Média da Razão on/off: {media:.2e}")
     
+     # --- gráfico vg vs log(igs) por ciclo ---
+    st.subheader("VG vs log(IGS)")
+    transistor2 = st.multiselect(
+    "Escolha um transistor", 
+    df["Transistor"].unique(),
+    default=[1],
+    key="transistor_igs")
+    fig2 = go.Figure() 
+
+    cores = ["blue", "red", "green", "orange", "purple", "pink", "brown", "gray", "cyan"]  
+    razoes = []
+    for i, t in enumerate(transistor2): 
+        cor = cores[i % len(cores)]
+        df_transistor = df_log[(df_log["transistor"] == t) & (df_log["direction"] == "ida")]
+        fig2.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t}", line=dict(color=cor, dash="solid")))
+        # razao_on_off = df[(df["Transistor"] == t)]["Razão on/off"].values
+        if len(razao_on_off) > 0:
+                razoes.append({"Transistor": t, "Valor": razao_on_off[0]})
+               
+        
+    fig2.update_layout(title="VG vs log(IGS)", xaxis_title="VG", yaxis_title="IGS",
+    yaxis=dict(type="log", exponentformat="power", dtick=1))
+    st.plotly_chart(fig2)
+    
+    
+   # --- gráfico vg vs log(IDS) e log(IGS) sobrepostos ---
+    st.subheader("VG vs log(IDS) e log(IGS)")
+    transistor3 = st.multiselect(
+        "Escolha um transistor",
+        df["Transistor"].unique(),
+        default=[1],
+        key="transistor_ids_igs")
+    fig3 = go.Figure()
+
+    for i, t in enumerate(transistor3):
+        cor = cores[i % len(cores)]
+        df_transistor = df_log[(df_log["transistor"] == t) & (df_log["direction"] == "ida")]
+        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t} - IDS", line=dict(color=cor, dash="solid")))
+        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t} - IGS", line=dict(color=cor, dash="dash")))
+
+    fig3.update_layout(title="VG vs log(IDS) e log(IGS)", xaxis_title="VG", yaxis_title="Corrente (A)",
+        yaxis=dict(type="log", exponentformat="power", dtick=1))
+    st.plotly_chart(fig3)   
+    
+    # # --- tabela de resultados on/off ---
+    # st.subheader("Razão on/off por transistor")
+    # df_on_off = pd.DataFrame(razoes) # transoforma a lista de dicionarios em tabela
+    # st.dataframe(df_on_off) 
+    # media = df_on_off["Valor"].mean()
+    # st.markdown(f"#### Média da Razão on/off: {media:.2e}")
+    
 else:
     st.warning("Por favor, suba um arquivo .xlsx para continuar")
     st.stop()
