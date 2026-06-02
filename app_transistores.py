@@ -23,18 +23,7 @@ if arquivo_upload is not None:
     
     # --- tabela de resultados ---
     st.subheader("Resultados")
-    st.dataframe(df)
-    
-     # --- filtro de transistores ---
-    st.subheader("Filtrar transistores")
-    transistores = st.multiselect(
-        "Escolha os transistores",
-        df["Transistor"],
-        default=df["Transistor"]
-    )
-    df_filtrado = df[df["Transistor"].isin(transistores)]  
-    st.line_chart(df_filtrado.set_index("Transistor")["Razão IDS/IGS"])
-    
+    st.dataframe(df)    
     
     # --- gráfico vg vs log(ids) por ciclo ---
     st.subheader("VG vs log(IDS)")
@@ -79,7 +68,7 @@ if arquivo_upload is not None:
     razoes = []
     for i, t in enumerate(transistor2): 
         cor = cores[i % len(cores)]
-        df_transistor = df_log[(df_log["transistor"] == t) & (df_log["direction"] == "ida")]
+        df_transistor = df_log[df_log["transistor"] == t]
         fig2.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t}", line=dict(color=cor, dash="solid")))
         # razao_on_off = df[(df["Transistor"] == t)]["Razão on/off"].values
         if len(razao_on_off) > 0:
@@ -102,7 +91,7 @@ if arquivo_upload is not None:
 
     for i, t in enumerate(transistor3):
         cor = cores[i % len(cores)]
-        df_transistor = df_log[(df_log["transistor"] == t) & (df_log["direction"] == "ida")]
+        df_transistor = df_log[df_log["transistor"] == t]
         fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t} - IDS", line=dict(color=cor, dash="solid")))
         fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t} - IGS", line=dict(color=cor, dash="dash")))
 
@@ -110,12 +99,22 @@ if arquivo_upload is not None:
         yaxis=dict(type="log", exponentformat="power", dtick=1))
     st.plotly_chart(fig3)   
     
-    # # --- tabela de resultados on/off ---
-    # st.subheader("Razão on/off por transistor")
-    # df_on_off = pd.DataFrame(razoes) # transoforma a lista de dicionarios em tabela
-    # st.dataframe(df_on_off) 
-    # media = df_on_off["Valor"].mean()
-    # st.markdown(f"#### Média da Razão on/off: {media:.2e}")
+    
+     # --- razao ids/igs ---
+    st.subheader("Razão IDS/IGS por Transistor")
+    transistores = st.multiselect(
+        "Escolha os transistores",
+        df["Transistor"],
+        default=df["Transistor"]
+    )
+    df_filtrado = df[df["Transistor"].isin(transistores)]  
+    fig_razao = go.Figure()
+    fig_razao.add_trace(go.Scatter(x=df_filtrado["Transistor"], y=df_filtrado["Razão IDS/IGS"], mode="lines+markers"))
+    fig_razao.update_layout(
+        title="Razão IDS/IGS por Transistor",
+        xaxis_title="Transistor"
+    )
+    st.plotly_chart(fig_razao)
     
 else:
     st.warning("Por favor, suba um arquivo .xlsx para continuar")

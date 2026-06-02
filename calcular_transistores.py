@@ -24,8 +24,9 @@ df_resultado["direction"] = np.where(df_resultado["diff_VG"] > 0, "ida", "volta"
 # remove as colunas vazias (Unnamed)
 df_resultado = df_resultado.dropna(subset=["IDS", "IGS"])
 
-# coloca IDS em valor absoluto
+# coloca IDS e IGS em valor absoluto
 df_resultado["IDS"] = np.abs(df_resultado["IDS"])
+df_resultado["IGS"] = np.abs(df_resultado["IGS"])
 
 # calcula o log do IDS
 df_resultado["log_IDS"] = np.log10(df_resultado["IDS"])
