@@ -31,6 +31,9 @@ df_resultado["IGS"] = np.abs(df_resultado["IGS"])
 # calcula o log do IDS
 df_resultado["log_IDS"] = np.log10(df_resultado["IDS"])
 
+# calcula a raiz quadrada do IDS
+df_resultado["sqrt_IDS"] = np.sqrt(df_resultado["IDS"])
+
 # salva o CSV
 df_resultado.to_csv("outputs/dados_transistores.csv", index=False)
 
@@ -55,6 +58,28 @@ for transistor in sorted(df_resultado["transistor"].unique()):
         razao = ids / igs
 
     razao_on_off = dados["IDS"].max() / dados["IDS"].min()
+    
+    
+    dados_ida = dados[dados["direction"] == "ida"].dropna(subset=["sqrt_IDS", "VG"])
+    
+    # filtra so a faixa de vg onde a curva ja ta subindo (regiao linear)
+    VG_MIN_AJUSTE = 5.0  
+    VG_MAX_AJUSTE = 11.0
+    dados_validos = dados_ida[(dados_ida["VG"] >= VG_MIN_AJUSTE) & (dados_ida["VG"] <= VG_MAX_AJUSTE)] #aq ajusta a janela de vg
+    
+    vg_vals = dados_validos["VG"].values #eixo x
+    sqrt_ids_vals = dados_validos["sqrt_IDS"].values #eixo y
+
+    if len(vg_vals) >= 2: #isso eh pra garantir que eh uma reta
+        # np.polyfit(x, y, 1) encontra a reta y = a*x + b que minimiza a soma
+        # dos erros ao quadrado entre os pontos reais e a reta (metodo dos
+        # minimos quadrados). Aqui: sqrt_IDS = a*VG + b.
+        coef = np.polyfit(vg_vals, sqrt_ids_vals, 1) #eixo x e y, grau de polinomio = 1. retorna os pontos 
+        a, b = coef[0], coef[1]
+        vth = -b / a if a != 0 else np.nan
+    else:
+        a, b, vth = np.nan, np.nan, np.nan
+    
     resultados.append({
         "Transistor": transistor,
         "VG": VG_alvo,
@@ -63,9 +88,11 @@ for transistor in sorted(df_resultado["transistor"].unique()):
         "Razão IDS/IGS": razao,
         "Razão on/off": razao_on_off,
         "Valor Máximo IDS": dados["IDS"].max(),
-        "Valor Mínimo IDS": dados["IDS"].min()
+        "Valor Mínimo IDS": dados["IDS"].min(),
+        "Vth (V)": round(vth, 4) if not np.isnan(vth) else np.nan,
+        "a (coef. angular)": a,
+        "b (coef. linear)": b
     })
-
-
+    
 df_result = pd.DataFrame(resultados)
 df_result.to_csv("outputs/razao_transistores.csv", index=False)

@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import subprocess
+import numpy as np
 
 st.set_page_config(layout="wide") 
 
@@ -12,7 +13,7 @@ arquivo_upload = st.file_uploader("Suba o arquivo de dados", type=["xlsx", "xls"
 
 if arquivo_upload is not None:
     
-    # --- salva o arquivo enviado pelo usuario ---
+    # --- salva o arquivo ---
     with open("data/dados_brutos.xls", "wb") as f:
         f.write(arquivo_upload.getbuffer())
     subprocess.run(["python3", "calcular_transistores.py"])
@@ -92,10 +93,9 @@ if arquivo_upload is not None:
     for i, t in enumerate(transistor3):
         cor = cores[i % len(cores)]
         df_transistor = df_log[df_log["transistor"] == t]
-        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t} - IDS", line=dict(color=cor, dash="solid")))
-        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t} - IGS", line=dict(color=cor, dash="dash")))
-
-    fig3.update_layout(title="VG vs log(IDS) e log(IGS)", xaxis_title="VG", yaxis_title="Corrente (A)",
+        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IDS"], name=f"Transistor {t} - IDS", line=dict(color="blue", dash="solid")))  
+        fig3.add_trace(go.Scatter(x=df_transistor["VG"], y=df_transistor["IGS"], name=f"Transistor {t} - IGS", line=dict(color="red", dash="solid")))
+        fig3.update_layout(title="VG vs log(IDS) e log(IGS)", xaxis_title="VG", yaxis_title="Corrente (A)",
         yaxis=dict(type="log", exponentformat="power", dtick=1))
     st.plotly_chart(fig3)   
     
@@ -116,6 +116,100 @@ if arquivo_upload is not None:
     )
     st.plotly_chart(fig_razao)
     
+    # grafico raiz do ids com reta de ajuste (vth)
+    st.subheader("VG vs √IDS — Extração do Vth")
+    transistor4 = st.multiselect(
+        "Escolha um transistor",
+        df["Transistor"].unique(),
+        default=[df["Transistor"].unique()[0]],
+        key="transistor_vth"
+    )
+
+    fig4 = go.Figure()
+
+    vth_resultados = []
+    for i, t in enumerate(transistor4):
+        cor = cores[i % len(cores)]
+        df_t = df_log[(df_log["transistor"] == t) & (df_log["direction"] == "ida")].dropna(subset=["IDS", "VG", "sqrt_IDS"]) #dropna joga fora os nan
+
+        vg_vals = df_t["VG"].values
+        sqrt_ids_vals = df_t["sqrt_IDS"].values
+
+        # curva raiz do ids
+        fig4.add_trace(go.Scatter(
+            x=vg_vals,
+            y=sqrt_ids_vals,
+            name=f"Transistor {t} — √IDS (ida)",
+            mode="lines",
+            line=dict(color=cor, dash="solid")
+        ))
+
+        row = df[df["Transistor"] == t]
+        if not row.empty:
+            a = row["a (coef. angular)"].values[0]
+            b = row["b (coef. linear)"].values[0]
+            vth = row["Vth (V)"].values[0]
+
+            vg_reta = np.linspace(vg_vals.min(), vg_vals.max(), 200) #retorna um array de 200 numeros
+            sqrt_reta = a * vg_reta + b #eixo y
+
+            fig4.add_trace(go.Scatter(
+                x=vg_reta,
+                y=sqrt_reta,
+                name=f"Transistor {t} — Reta de ajuste (Vth={vth:.2f} V)",
+                line=dict(color=cor, dash="dash", width=2)
+            ))
+
+            fig4.add_trace(go.Scatter(
+                x=[vth],
+                y=[0],
+                mode="markers+text",
+                marker=dict(color=cor, size=10, symbol="x"),
+                text=[f"Vth={vth:.2f} V"],
+                textposition="top right",
+                showlegend=False
+            ))
+
+            vth_resultados.append({"Transistor": t, "Vth (V)": vth})
+
+    fig4.update_layout(
+        title="VG vs √IDS — Extração do Vth",
+        xaxis_title="VG (V)",
+        yaxis_title="√IDS (A^0.5)",
+    )
+    st.plotly_chart(fig4)
+
+    # tabela vth
+    if vth_resultados:
+        st.subheader("Vth por Transistor")
+
+        resumo = []
+        for t in transistor4:
+            linha_df = df[df["Transistor"] == t]
+            if not linha_df.empty:
+                vg_ref = linha_df["VG"].values[0]
+                ids_ref = linha_df["IDS (A)"].values[0]
+                vth_ref = linha_df["Vth (V)"].values[0]
+                resumo.append({
+                    "Transistor": t,
+                    "IDS (A)": ids_ref,
+                    "√IDS (A^0.5)": np.sqrt(ids_ref),
+                    "Vth (V)": vth_ref
+                })
+
+        df_resumo = pd.DataFrame(resumo)
+        st.dataframe(
+            df_resumo,
+            use_container_width=True,
+            column_config={
+                "IDS (A)": st.column_config.NumberColumn(format="%.6e"),
+                "√IDS (A^0.5)": st.column_config.NumberColumn(format="%.6e"),
+                "Vth (V)": st.column_config.NumberColumn(format="%.4f"),
+            }
+        )
+        
+        media_vth = df_resumo["Vth (V)"].mean()
+        st.markdown(f"#### Média do Vth: {media_vth:.4f} V")
 else:
     st.warning("Por favor, suba um arquivo .xlsx para continuar")
     st.stop()
