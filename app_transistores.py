@@ -210,6 +210,22 @@ if arquivo_upload is not None:
         
         media_vth = df_resumo["Vth (V)"].mean()
         st.markdown(f"#### Média do Vth: {media_vth:.4f} V")
+        
+            # --- resumo geral ---
+    st.subheader("Resumo Geral")
+
+    onoff_media = df["Razão on/off"].mean()
+    onoff_dp = df["Razão on/off"].std()
+    vth_media = df["Vth (V)"].mean()
+    vth_dp = df["Vth (V)"].std()
+
+    resumo_geral = pd.DataFrame([{
+        "Arquivo": arquivo_upload.name,
+        "Razão on/off": f"{onoff_media:.2e} ± {onoff_dp:.2e}",
+        "Vth (V)": f"{vth_media:.4f} ± {vth_dp:.4f}",
+    }])
+
+    st.dataframe(resumo_geral, use_container_width=True)
 else:
     st.warning("Por favor, suba um arquivo .xlsx para continuar")
     st.stop()
