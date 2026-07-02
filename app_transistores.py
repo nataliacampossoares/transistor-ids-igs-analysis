@@ -152,6 +152,11 @@ if arquivo_upload is not None:
 
             vg_reta = np.linspace(vg_vals.min(), vg_vals.max(), 200) #retorna um array de 200 numeros
             sqrt_reta = a * vg_reta + b #eixo y
+            
+            #isso é pra deixar o eixo y acima de 0
+            mask = sqrt_reta >= 0
+            vg_reta = vg_reta[mask]
+            sqrt_reta = sqrt_reta[mask]
 
             fig4.add_trace(go.Scatter(
                 x=vg_reta,
@@ -173,7 +178,6 @@ if arquivo_upload is not None:
             vth_resultados.append({"Transistor": t, "Vth (V)": vth})
 
     fig4.update_layout(
-        title="VG vs √IDS — Extração do Vth",
         xaxis_title="VG (V)",
         yaxis_title="√IDS (A^0.5)",
     )
@@ -212,7 +216,7 @@ if arquivo_upload is not None:
         st.markdown(f"#### Média do Vth: {media_vth:.4f} V")
         
             # --- resumo geral ---
-    st.subheader("Resumo Geral")
+    st.header("Resumo Geral")
 
     onoff_media = df["Razão on/off"].mean()
     onoff_dp = df["Razão on/off"].std()
